@@ -1,11 +1,22 @@
 import json
 import requests
 
+from enum import Enum
 from abc import ABC, abstractmethod
 from bs4 import BeautifulSoup
+from loguru import logger
 from typing import List
 
 
+class StoreNames(Enum):
+
+    PSN   = 'psn'
+    XBOX  = 'xbox'
+    EPIC  = 'epic'
+    STEAM = 'steam'
+
+
+@logger.catch()
 class Game:
     """
     Data-value class for game objects
@@ -13,14 +24,15 @@ class Game:
 
     def __init__(self, title: str, link: str, store):
 
-        self.title = title
+        self.title = self._remove_ascii(title)
         self.link  = link
         self.store = store
 
     def get_data(self) -> dict:
         """
-        Combines all data and returns a JSON string
+        Combines all data and returns a JSON compatible dict
         """
+
         data = {
             'title': self.get_title(),
             'link' : self.get_link(),
@@ -44,6 +56,11 @@ class Game:
     def get_store_name(self):
 
         return self.store.get_name()
+
+    @staticmethod
+    def _remove_ascii(text: str):
+
+        return text.encode('ascii', 'ignore').decode()
 
 
 class Store(ABC):

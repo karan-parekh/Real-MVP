@@ -2,17 +2,18 @@
 from bs4 import BeautifulSoup
 from typing import List
 
-from . import Store, Game
+from . import Store, Game, StoreNames
 
 
 class PSN(Store):
 
-    NAME = 'playstation-store'
-    URL  = 'https://store.playstation.com/en-in/home/games/psplus'
+    NAME         = StoreNames.PSN.value
+    BASE_URL     = 'https://store.playstation.com'
+    PS_PLUS_PATH = '/en-in/home/games/psplus'
 
     def __init__(self):
 
-        super(PSN, self).__init__(self.NAME, self.URL)
+        super(PSN, self).__init__(self.NAME, self.BASE_URL)
 
     def get_free_games(self) -> List[Game]:
 
@@ -32,15 +33,14 @@ class PSN(Store):
         """
         Gets the game names and links
         """
-        build_url = lambda path_: self.URL + path_
 
         names = {}
 
         for game in games:
-            title = game.find('div', 'grid-cell__title').span.text
 
-            path = game.find('a', 'internal-app-link ember-view')['href']
-            link = build_url(path)
+            title = game.find('div', 'grid-cell__title').span.text
+            path  = game.find('a', 'internal-app-link ember-view')['href']
+            link  = self._build_url(path)
 
             names[title] = link
 
@@ -68,7 +68,7 @@ class PSN(Store):
         Gets the container containing free games
         """
 
-        soup = self.get_soup(self.URL)
+        soup = self.get_soup(self._build_url(self.PS_PLUS_PATH))
 
         for container in soup.find_all('div', 'grid-cell-row'):
 
@@ -77,3 +77,13 @@ class PSN(Store):
             if 'monthly games' in name.text.lower():
                 return container
 
+    def _build_url(self, path: str) -> str:
+        """
+        Appends path with the base URL
+        """
+
+        if not path.startswith("/"):
+
+            return "{}/{}".format(self.BASE_URL, path)
+
+        return "{}{}".format(self.BASE_URL, path)
