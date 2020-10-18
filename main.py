@@ -4,11 +4,10 @@ from datetime import datetime, timedelta
 from loguru import logger
 from typing import List, Optional
 
-from modules.discord import DiscordModule as Discord
 from stores import Game
 from stores.psn import PSN
 from utils.helpers import read_file
-from utils.paths import get_storage_path, get_tmp_path, get_data_path
+from utils.paths import get_tmp_path, get_data_path
 
 
 class Gamer:
@@ -20,52 +19,28 @@ class Gamer:
         self.stores = [PSN]
         self.now    = datetime.now()
 
-    def run(self):
+    def run(self) -> Optional[List[dict]]:
 
         logger.info("Gamer initiated")
 
-        if not self._is_time():
-            logger.info("Interval has not passed. Returning")
-            return
-
         games = self._get_games()
+
+        logger.info("Found {} games".format(len(games)))
 
         self._backup_data()
         self._update_data(games)
-        self._post_to_discord()
-        self._update_stamp(self.now)
 
-    def _post_to_discord(self):
-        """
-        Posts the data to discord channel
-        """
-        logger.info("Posting to Discord")
+        games = self.find_new_games()
 
-        games = self._find_new_games()
+        if games:
+            logger.info("New games: {}".format(", ".join([game['title'] for game in games])))
 
-        if not games:
-            logger.info("No new games found. Returning")
-            return
+            return games
 
-    # Todo: Use Discord module to post ot Discord
-
-    def _find_new_games(self) -> Optional[List[dict]]:
-        """
-        Checks for difference between old and new data
-        to find new games
-        """
-        logger.info("Check for difference in old and new data")
-
-        old_games = set(self._get_games_from_data('old.json'))
-        new_games = set(self._get_games_from_data('new.json'))
-
-        diff = new_games.difference(old_games)
-
-        if diff:
-            return list(diff)
+        logger.info("No new games found")
 
     @staticmethod
-    def _get_games_from_data(filename: str) -> List[dict]:
+    def get_games_from_data(filename: str) -> List[dict]:
         """
         Gets the list of games from the JSON data
         """
@@ -74,7 +49,60 @@ class Gamer:
 
             data = json.load(file)
 
+        if not data:
+            return data
+
         return data['games']
+
+    def _post_to_discord(self):
+        """
+        Posts the data to discord channel
+        """
+        logger.info("Posting to Discord")
+
+        games = self.find_new_games()
+
+        if not games:
+            logger.info("No new games found. Returning")
+            return
+
+        logger.info("Found new games: {}".format(", ".join([game['title'] for game in games])))
+
+    def find_new_games(self) -> Optional[List[dict]]:
+        """
+        Checks for difference between old and new data
+        to find new games
+        """
+        logger.info("Checking difference in old and new data")
+
+        old_games = self.get_games_from_data('old.json')
+        new_games = self.get_games_from_data('new.json')
+
+        if not old_games:
+
+            return new_games
+
+        old_titles = set(game['title'] for game in old_games)
+        new_titles = set(game['title'] for game in new_games)
+
+        logger.info("Old titles: {}".format(old_titles))
+        logger.info("New titles: {}".format(new_titles))
+
+        diff = new_titles.difference(old_titles)
+
+        if diff:
+
+            games = []
+
+            for title in diff:
+
+                for game in new_games:
+
+                    if title == game['title']:
+
+                        games.append(game)
+
+            return games
 
     def _update_stamp(self, stamp: datetime=None):
         """
@@ -102,18 +130,23 @@ class Gamer:
             data['meta']['stores'].append(game.get_store_name())
             data['games'].append(game.get_data())
 
-    def _backup_data(self):
+        with open(get_data_path('new.json'), 'w') as file:
+
+            json.dump(data, file)
+
+    @staticmethod
+    def _backup_data():
         """
         Moves current data to old.json
         """
 
         logger.info("Backing up current data")
 
-        with open(get_storage_path('new.json'), 'r') as file:
+        with open(get_data_path('new.json'), 'r') as file:
 
             data = json.load(file)
 
-        with open(get_storage_path('old.json'), 'w') as file:
+        with open(get_data_path('old.json'), 'w') as file:
 
             json.dump(data, file)
 
@@ -158,6 +191,6 @@ class Gamer:
 
 if __name__ == '__main__':
 
-    Gamer().run()
+    gamer = Gamer()
 
-
+    print(gamer.find_new_games())
