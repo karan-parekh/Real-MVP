@@ -1,19 +1,24 @@
 import os
 
 from os.path import join
+from inspect import getsourcefile
 
 
-def get_app_path(path: str=''):
+CURRENT_PATH = os.path.dirname(os.path.abspath(getsourcefile(lambda: 0)))
 
-    cwd      = os.getcwd()
-    app_path = cwd.rsplit(os.sep, 1)[0]
 
-    return join(app_path, path)
+def app_path(path=''):
+    app_path_ = os.path.realpath("{}/{}".format(CURRENT_PATH, "../"))
+
+    if not path:
+        return app_path_
+
+    return os.path.realpath("{}/{}".format(app_path_, path))
 
 
 def get_storage_path(file: str=''):
 
-    storage = get_app_path('storage')
+    storage = app_path('storage')
 
     return join(storage, file)
 
@@ -27,7 +32,7 @@ def get_data_path(file=''):
 
 def get_tmp_path(file: str=''):
 
-    tmp = get_app_path('tmp')
+    tmp = app_path('tmp')
 
     return join(tmp, file)
 
@@ -39,6 +44,6 @@ def get_stamp_file():
 
 if __name__ == '__main__':
 
-    print(get_app_path())
+    print(app_path())
 
     print(get_stamp_file())
