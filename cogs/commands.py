@@ -1,3 +1,4 @@
+import discord
 
 from discord.guild import Guild
 from discord.abc import GuildChannel
@@ -15,6 +16,41 @@ class Commands(commands.Cog):
     def __init__(self, client):
 
         self.client = client
+
+    @commands.command()
+    async def help(self, ctx):
+
+        embed = discord.Embed(title="Commands")
+
+        commands_ = {
+            "free": "Lists all free games from all stores",
+            "store": "Lists all free games for a store: <name>",
+            "stores": "List all supported stores",
+            "sub": "Subscribes to free games updates",
+            "unsub": "Un-subscribes to free games updates"
+        }
+
+        for name, help_ in commands_.items():
+
+            embed.add_field(
+                name=name,
+                value=help_,
+                inline=False
+            )
+
+        await ctx.send(embed=embed)
+
+    @commands.command()
+    async def stores(self, ctx):
+
+        embed = discord.Embed(title="Supported stores")
+
+        embed.add_field(
+            name='PlayStation Store',
+            value='code: psn'
+        )
+        
+        await ctx.send(embed=embed)
 
     @commands.command(help="Lists all free games from all stores")
     async def free(self, ctx):
