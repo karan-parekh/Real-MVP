@@ -11,6 +11,8 @@ from loguru import logger
 
 client = commands.Bot(command_prefix='gg ')
 
+client.remove_command('help')
+
 
 @client.command(help="Load a command")
 async def load(ctx, extension):
