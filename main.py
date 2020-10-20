@@ -193,4 +193,5 @@ if __name__ == '__main__':
 
     gamer = Gamer()
 
-    print(gamer.find_new_games())
+    # print(gamer.find_new_games())
+    print(gamer.run())
