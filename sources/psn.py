@@ -2,12 +2,12 @@
 from bs4 import BeautifulSoup
 from typing import List
 
-from . import Store, Game, StoreNames
+from . import Store, Game, Service
 
 
 class PSN(Store):
 
-    NAME         = StoreNames.PSN.value
+    NAME         = Service.PS_NOW.value
     BASE_URL     = 'https://store.playstation.com'
     PS_PLUS_PATH = '/en-in/home/games/psplus'
 

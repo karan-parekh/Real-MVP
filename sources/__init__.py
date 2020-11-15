@@ -8,12 +8,50 @@ from loguru import logger
 from typing import List
 
 
-class StoreNames(Enum):
+class Platform(Enum):
 
-    PSN   = 'psn'
-    XBOX  = 'xbox'
-    EPIC  = 'epic'
-    STEAM = 'steam'
+    PC       = 'pc'
+    PS4      = 'ps4'
+    PS5      = 'ps5'
+    STADIA   = 'stadia'
+    XBOX     = 'xb'
+    XBOX_360 = 'x360'
+    XBOX_ONE = 'xb1'
+    XBOXS_S  = 'xbs'
+    XBOXS_X  = 'xbx'
+
+    @classmethod
+    def all(cls) -> list:
+
+        return list(set(map(lambda c: c.value, cls)))
+
+
+class Service(Enum):
+
+    SELF      = 'self',   []
+    STEAM     = 'steam',  [Platform.PC.value]
+    EPIC      = 'epic',   [Platform.PC.value]
+    HUMBLE    = 'humble', [Platform.PC.value]
+    PRIME     = 'prime',  [Platform.PC.value]
+    INDIEGALA = 'indie',  [Platform.PC.value]
+    ITCH      = 'itch',   [Platform.PC.value]
+    PS_NOW    = 'psn',    [Platform.PC.value]
+    PS_PLUS   = 'ps+',    [Platform.PS4.value, Platform.PS5.value]
+    STADIA    = 'stadia', [Platform.STADIA.value]
+    MICROSOFT = 'ms',     [Platform.XBOX.value, Platform.XBOX_360.value, Platform.XBOX_ONE.value,
+                           Platform.XBOXS_S.value, Platform.XBOXS_X.value]
+
+    def __new__(cls, value, platforms):
+
+        member           = object.__new__(cls)
+        member._value_   = value
+        member.platforms = platforms
+
+        return member
+
+    @classmethod
+    def all(cls) -> list:
+        return list(set(map(lambda c: str(c.value), cls)))
 
 
 @logger.catch()
@@ -65,7 +103,7 @@ class Game:
 
 class Store(ABC):
 
-    def __init__(self, name: str, url: str):
+    def __init__(self, name: Service, url: str):
 
         self.name = name
         self.url  = url
