@@ -4,8 +4,8 @@ from datetime import datetime, timedelta
 from loguru import logger
 from typing import List, Optional
 
-from stores import Game
-from stores.psn import PSN
+from sources import Game
+from sources.psn import PSN
 from utils.helpers import read_file
 from utils.paths import get_tmp_path, get_data_path
 
@@ -120,14 +120,14 @@ class Gamer:
         data = {
             'meta': {
                 'run'   : str(self.now),
-                'stores': []
+                'sources': []
             },
             'games': []
         }
 
         for game in games:
 
-            data['meta']['stores'].append(game.get_store_name())
+            data['meta']['sources'].append(game.get_store_name())
             data['games'].append(game.get_data())
 
         with open(get_data_path('new.json'), 'w') as file:
@@ -152,7 +152,7 @@ class Gamer:
 
     def _get_games(self) -> List[Game]:
         """
-        Gets all free games from stores
+        Gets all free games from sources
         """
         logger.info("Getting games")
 

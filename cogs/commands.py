@@ -23,9 +23,9 @@ class Commands(commands.Cog):
         embed = discord.Embed(title="Commands")
 
         commands_ = {
-            "free": "Lists all free games from all stores",
+            "free": "Lists all free games from all sources",
             "store": "Lists all free games for a store: <name>",
-            "stores": "List all supported stores",
+            "sources": "List all supported sources",
             "sub": "Subscribes to free games updates",
             "unsub": "Un-subscribes to free games updates"
         }
@@ -43,16 +43,16 @@ class Commands(commands.Cog):
     @commands.command()
     async def stores(self, ctx):
 
-        embed = discord.Embed(title="Supported stores")
+        embed = discord.Embed(title="Supported sources")
 
         embed.add_field(
             name='PlayStation Store',
             value='code: psn'
         )
-        
+
         await ctx.send(embed=embed)
 
-    @commands.command(help="Lists all free games from all stores")
+    @commands.command(help="Lists all free games from all sources")
     async def free(self, ctx):
 
         games = Gamer().get_games_from_data('new.json')
