@@ -23,6 +23,18 @@ def get_storage_path(file: str=''):
     return join(storage, file)
 
 
+def get_games_path(file=''):
+
+    games = get_storage_path('games')
+
+    return join(games, file)
+
+
+def get_template_path():
+
+    return get_games_path('template.json')
+
+
 def get_data_path(file=''):
 
     data = get_storage_path('data')
