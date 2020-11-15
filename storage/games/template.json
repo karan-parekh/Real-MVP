@@ -1,0 +1,13 @@
+{
+  "title"     : null,
+  "platform"  : null,
+  "service"   : null,
+  "link"      : null,
+  "available" : true,
+  "f2p"       : false,
+  "genre"     : null,
+  "year"      : null,
+  "date_start": null,
+  "date_end"  : null,
+  "score"     : null
+}
