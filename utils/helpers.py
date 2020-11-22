@@ -42,13 +42,26 @@ def write_to_file(path: str, data: str):
         file.write(data)
 
 
-async def post_to_discord(games: List[dict], title: str, ctx=None, channel=None):
+async def post_to_discord(games: List[dict], title: str, **kwargs):
+    """
+    Posts to discord
 
-    if not any([ctx, channel]):
+    :param games: games to be posted
+    :param title: title for the post
+    :param kwargs: kwargs must specify at least one of the following connectors
+                   [ctx, channel, guild]
+    """
 
-        logger.error("Expected at least 'ctx' or 'client' object")
+    connectors = ['ctx', 'channel', 'guild']
 
-        raise NoConnectionElement("Expected at least 'ctx' or 'client' object")
+    for key in connectors:
+
+        connector = kwargs.get(key)
+
+        if connector:
+            break
+    else:
+        raise NoConnectorObject("Expected at least one connector object out of {}".format(connectors))
 
     embed = discord.Embed(title=title)
 
@@ -56,16 +69,20 @@ async def post_to_discord(games: List[dict], title: str, ctx=None, channel=None)
 
         embed.add_field(
             name=game['title'],
-            value="is free on [{}]({})".format(game['store'], game['link']),
+            value="is free on [{}]({})".format(game['service'], game['link']),
             inline=False
         )
 
-    if ctx:
-        await ctx.send(embed=embed)
-        return
+    if kwargs.get('guild'):
 
-    if channel:
-        await channel.send(embed=embed)
+        for channel in connector.channels:
+
+            if channel.name == 'free-games':
+                await channel.send(embed=embed)
+
+                return
+
+    await connector.send(embed=embed)
 
 
 def get_standard_headers():
@@ -94,7 +111,5 @@ def get_useragents() -> list:
     ]
 
 
-
-
-class NoConnectionElement(Exception):
+class NoConnectorObject(Exception):
     """Raised when no context or channel object was found"""

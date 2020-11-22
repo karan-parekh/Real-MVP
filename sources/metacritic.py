@@ -13,6 +13,7 @@ from . import Service, Platform
 
 class MetaCritic:
 
+    NAME     = 'metacritic'
     BASE_URL = "https://www.metacritic.com"
     FG_PATH  = "/feature/new-free-games-playstation-xbox-pc-switch"
 
@@ -83,10 +84,6 @@ class MetaCritic:
 
                         # logger.info("Found: {}".format(game['title']))
 
-                        if game['title'] == 'Imperator: Rome':
-
-                            print("Game: ", game)
-
                 except IndexError:
                     next(rows)
                     logger.warning("Could not get game from row: {}".format(row))
@@ -115,11 +112,24 @@ class MetaCritic:
 
         return Service.SELF
 
-    def _get_platform(self, service: Service):
+    def _get_platform(self, header: str) -> Optional[str]:
 
-        if len(service.platforms) == 1:
+        platform_map = {
+            'pc'           : Platform.PC,
+            'ps4'          : Platform.PS4,
+            'ps5'          : Platform.PS5,
+            'stadia'       : Platform.STADIA,
+            'xbox'         : Platform.XBOX,
+            'x360'         : Platform.XBOX_360,
+            'xb1'          : Platform.XBOX_ONE,
+            'xbox series s': Platform.XBOXS_S,
+            'xbox series x': Platform.XBOXS_X,
+        }
 
-            return service.platofrms[0]
+        for string, platform in platform_map.items():
+
+            if string in header.lower():
+                return platform.value
 
     def _get_lower_data(self, lower) -> dict:
 
@@ -162,7 +172,8 @@ class MetaCritic:
             name     = sterilize(title_anchor.text)
 
             if not platform:
-                platform = sterilize(title.text.split(name)[1])
+                platform = sterilize(title.text.split(name)[1]).lower()
+                platform = self._get_platform(platform) or platform
 
         else:
             name = sterilize(title.text)
