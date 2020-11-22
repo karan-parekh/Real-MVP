@@ -10,20 +10,46 @@ from typing import List
 
 class Platform(Enum):
 
-    PC       = 'pc'
-    PS4      = 'ps4'
-    PS5      = 'ps5'
-    STADIA   = 'stadia'
-    XBOX     = 'xb'
-    XBOX_360 = 'x360'
-    XBOX_ONE = 'xb1'
-    XBOXS_S  = 'xbs'
-    XBOXS_X  = 'xbx'
+    PC       = 'pc',     'PC'
+    PS4      = 'ps4',    'Playstation 4'
+    PS5      = 'ps5',    'Playstation 5'
+    STADIA   = 'stadia', 'Stadia'
+    XBOX     = 'xb',     'Xbox'
+    XBOX_360 = 'x360',   'Xbox 360'
+    XBOX_ONE = 'xb1',    'Xbox One'
+    XBOXS_S  = 'xbs',    'Xbox Series S'
+    XBOXS_X  = 'xbx',    'Xbox Series X'
+
+    def __new__(cls, value, ui_name):
+
+        member         = object.__new__(cls)
+        member._value_ = value
+        member.ui_name = ui_name
+
+        return member
 
     @classmethod
     def all(cls) -> list:
 
         return list(set(map(lambda c: c.value, cls)))
+
+    @classmethod
+    def ui_index(cls) -> List[dict]:
+
+        index = []
+
+        for platform in cls:
+            name = str(platform.ui_name)
+
+            if name == 'SELF':
+                continue
+
+            index.append({
+                'name': name,
+                'code': platform.value
+            })
+
+        return index
 
 
 class Service(Enum):
@@ -50,8 +76,30 @@ class Service(Enum):
         return member
 
     @classmethod
-    def all(cls) -> list:
+    def all_values(cls) -> list:
         return list(set(map(lambda c: str(c.value), cls)))
+
+    @classmethod
+    def all_names(cls) -> list:
+        return list(set(map(lambda c: str(c.name), cls)))
+
+    @classmethod
+    def ui_index(cls) -> List[dict]:
+
+        index = []
+
+        for service in cls:
+            name = str(service.name)
+
+            if name == 'SELF':
+                continue
+
+            index.append({
+                'name': name.replace("_", " ").title(),
+                'code': service.value
+            })
+
+        return index
 
 
 @logger.catch()
