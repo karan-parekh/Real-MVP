@@ -12,6 +12,7 @@ discord = "*"
 python-dotenv = "*"
 loguru = "*"
 tinydb = "*"
+sentry-sdk = "*"
 
 [requires]
 python_version = "3.7"
