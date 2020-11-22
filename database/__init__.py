@@ -11,9 +11,10 @@ from utils.paths import get_storage_path, get_games_path
 class GamesRepository:
     """A TinyDB JSON database"""
 
-    DB  = 'games'
-    NEW = 'new'
-    OLD = 'old'
+    DB   = 'games'
+    NEW  = 'new'
+    OLD  = 'old'
+    DIFF = 'diff'
 
     def __init__(self):
 
@@ -32,6 +33,10 @@ class GamesRepository:
 
         return self._get_games(self.OLD)
 
+    def get_diff(self) -> List[dict]:
+
+        return self._get_games(self.DIFF)
+
     def replace_new_games(self, games: List[dict]):
 
         self._replace_games(self.NEW, games)
@@ -40,21 +45,31 @@ class GamesRepository:
 
         self._replace_games(self.OLD, games)
 
+    def replace_diff(self, games: List[dict]):
+
+        self._replace_games(self.DIFF, games)
+
     def find_by_platform(self, table_name: str, name: str) -> List[dict]:
 
-        table = self.get_table(table_name)
+        table = self._get_table(table_name)
 
         return table.search(where('platform') == name)
 
+    def find_by_service(self, table_name: str, name: str) -> List[dict]:
+
+        table = self._get_table(table_name)
+
+        return table.search(where('service') == name)
+
     def _get_games(self, table_name: str) -> List[dict]:
 
-        table = self.get_table(table_name)
+        table = self._get_table(table_name)
 
-        return [game for game in table]
+        return [game for game in table.all()]
 
     def _replace_games(self, table_name: str, games: List[dict]):
 
-        table = self.get_table(table_name)
+        table = self._get_table(table_name)
 
         self._delete_table(table_name)
         self._create(table_name)
@@ -73,6 +88,7 @@ class GamesRepository:
 
         self._create(self.OLD)
         self._create(self.NEW)
+        self._create(self.DIFF)
 
     def _delete_table(self, table_name: str):
         """Purges table in DB"""
@@ -80,7 +96,7 @@ class GamesRepository:
         if table_name in self.db.tables():
             self.db.table(table_name).truncate()
 
-    def get_table(self, table_name: str) -> TinyDB.table:
+    def _get_table(self, table_name: str) -> TinyDB.table:
 
         if table_name not in self.db.tables():
 
